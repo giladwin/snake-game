@@ -4,7 +4,8 @@
   "description": "Snake game served with Node.js",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test"
   },
   "dependencies": {
     "mongodb": "^6.0.0"
