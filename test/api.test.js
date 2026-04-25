@@ -141,13 +141,13 @@ describe('API', () => {
     test('GET / returns index.html', async () => {
       const { status, body } = await request(server, { path: '/' });
       assert.equal(status, 200);
-      assert.ok(body.includes('<title>Snake</title>'));
+      assert.ok(body.includes('<title>Snake Game</title>'));
     });
 
     test('GET /?admin=token returns index.html, not 404', async () => {
       const { status, body } = await request(server, { path: '/?admin=test-secret' });
       assert.equal(status, 200);
-      assert.ok(body.includes('<title>Snake</title>'));
+      assert.ok(body.includes('<title>Snake Game</title>'));
     });
 
     test('GET /nonexistent returns 404', async () => {
