@@ -1,14 +1,26 @@
 # Snake Game
 
-A classic Snake game served with a zero-dependency Node.js HTTP server.
+A classic Snake game with a realistic illustrated snake, served via a Node.js HTTP server and containerized with Docker.
 
-## Run
+## Run with Docker
+
+```bash
+# Build the image
+docker build -t snake-game .
+
+# Run the container
+docker run -p 3000:3000 snake-game
+```
+
+Then open http://localhost:3000 in your browser.
+
+## Run without Docker
 
 ```bash
 node server.js
 ```
 
-Then open http://localhost:3000 in your browser.
+Requires [Node.js](https://nodejs.org) installed.
 
 ## Controls
 
@@ -16,10 +28,12 @@ Then open http://localhost:3000 in your browser.
 |-----|--------|
 | Arrow keys / WASD | Move |
 | Space / P | Pause |
-| On-screen D-pad | Mobile / trackpad |
+| On-screen D-pad | Mobile / touch |
 
 ## Scoring
 
-- Red apple → **+10 × level**
-- Gold star (rare, disappears!) → **+50 × level**
-- Every 100 pts → level up (max 10), snake speeds up
+| Item | Points |
+|------|--------|
+| Red apple | +10 × level |
+| Gold star (disappears!) | +50 × level |
+| Every 100 pts | Level up (max 10) |
