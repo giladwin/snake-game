@@ -1,26 +1,25 @@
 # Snake Game
 
-A classic Snake game with a realistic illustrated snake, served via a Node.js HTTP server and containerized with Docker.
+A classic Snake game with a realistic illustrated snake, MongoDB leaderboard, served via Node.js and containerized with Docker.
 
-## Run with Docker
+## Run with Docker Compose (recommended)
 
 ```bash
-# Build the image
-docker build -t snake-game .
-
-# Run the container
-docker run -p 3000:3000 snake-game
+docker-compose up --build
 ```
 
 Then open http://localhost:3000 in your browser.
 
+Scores are persisted in a named Docker volume — they survive container restarts.
+
 ## Run without Docker
 
-```bash
-node server.js
-```
+Requires [Node.js](https://nodejs.org) and a local MongoDB instance.
 
-Requires [Node.js](https://nodejs.org) installed.
+```bash
+npm install
+MONGO_URI=mongodb://localhost:27017/snakegame node server.js
+```
 
 ## Controls
 
@@ -37,3 +36,10 @@ Requires [Node.js](https://nodejs.org) installed.
 | Red apple | +10 × level |
 | Gold star (disappears!) | +50 × level |
 | Every 100 pts | Level up (max 10) |
+
+## Stack
+
+- **Frontend** — vanilla JS + Canvas API
+- **Backend** — Node.js HTTP server (no framework)
+- **Database** — MongoDB (via Docker Compose)
+- **Container** — Docker + Docker Compose
