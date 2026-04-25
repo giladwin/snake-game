@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/snakegame';
@@ -35,7 +35,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/api/scores') {
     try {
       const scores = await db.collection('scores')
-        .find({})
+        .find({ status: { $ne: 'hidden' } })
         .sort({ score: -1 })
         .limit(10)
         .toArray();
@@ -75,8 +75,40 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && req.url === '/api/admin') {
+    const adminToken = process.env.ADMIN_TOKEN;
+    if (!adminToken || req.headers.authorization !== `Bearer ${adminToken}`) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Unauthorized' }));
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  if (req.method === 'DELETE' && req.url.startsWith('/api/scores/')) {
+    const adminToken = process.env.ADMIN_TOKEN;
+    if (!adminToken || req.headers.authorization !== `Bearer ${adminToken}`) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Unauthorized' }));
+      return;
+    }
+    const id = req.url.slice('/api/scores/'.length);
+    try {
+      await db.collection('scores').updateOne({ _id: new ObjectId(id) }, { $set: { status: 'hidden' } });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'DB error' }));
+    }
+    return;
+  }
+
+  const pathname = new URL(req.url, 'http://localhost').pathname;
   let filePath = path.join(__dirname, 'public',
-    req.url === '/' ? 'index.html' : req.url);
+    pathname === '/' ? 'index.html' : pathname);
 
   const ext = path.extname(filePath);
   const contentType = mimeTypes[ext] || 'text/plain';

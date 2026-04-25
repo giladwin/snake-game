@@ -45,6 +45,8 @@
     .score-name { flex: 1; color: #c9d1d9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .score-val { font-family: 'Share Tech Mono', monospace; color: #4ade80; flex-shrink: 0; }
     #scores-empty { font-size: 12px; color: #484f58; text-align: center; padding: 1rem 0; }
+    .delete-btn { background: none; border: none; color: #484f58; cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+    .delete-btn:hover { color: #e85050; }
   </style>
 </head>
 <body>
@@ -97,6 +99,9 @@ const levelEl=document.getElementById('level');
 const playerNameEl=document.getElementById('player-name');
 const scoresList=document.getElementById('scores-list');
 const lbStatus=document.getElementById('lb-status');
+
+const adminToken = new URLSearchParams(location.search).get('admin');
+let isAdmin = false;
 
 let snake,dir,nextDir,food,special;
 let score,hi=0,running=false,paused=false,loop,frameCount=0,level=1;
@@ -279,8 +284,17 @@ function renderScores(scores){
       <span class="score-rank ${rankClass[i]||''}">${i+1}</span>
       <span class="score-name">${s.name}</span>
       <span class="score-val">${s.score}</span>
+      ${isAdmin?`<button class="delete-btn" data-id="${s._id}">×</button>`:''}
     </div>
   `).join('');
+  if(isAdmin){
+    scoresList.querySelectorAll('.delete-btn').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        await fetch(`/api/scores/${btn.dataset.id}`,{method:'DELETE',headers:{Authorization:`Bearer ${adminToken}`}});
+        await loadScores();
+      });
+    });
+  }
 }
 
 async function gameOver(){
@@ -319,7 +333,15 @@ document.querySelectorAll('.dpad-btn').forEach(btn=>{
   });
 });
 
-loadScoresWithRetry();
+async function verifyAdmin(){
+  if(!adminToken)return;
+  try{
+    const res=await fetch('/api/admin',{headers:{Authorization:`Bearer ${adminToken}`}});
+    if(res.ok)isAdmin=true;
+  }catch(e){}
+}
+
+verifyAdmin().then(()=>loadScoresWithRetry());
 setInterval(loadScores,10000);
 </script>
 </body>
